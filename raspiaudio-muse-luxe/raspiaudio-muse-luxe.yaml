@@ -1,16 +1,16 @@
 substitutions:
   name: raspiaudio-muse-luxe
   friendly_name: RaspiAudio Muse Luxe
-  micro_wake_word_model: okay_nabu  
+  micro_wake_word_model: okay_nabu
 
 esphome:
   name: ${name}
   name_add_mac_suffix: true
   friendly_name: ${friendly_name}
-  min_version: 2024.7.1
+  min_version: 2024.9.0
   project:
     name: raspiaudio.muse-luxe-voice-assistant
-    version: "24.8"
+    version: "24.9"
 
 esp32:
   board: esp-wrover-kit
@@ -33,7 +33,7 @@ i2c:
   - id: i2c_bus
     sda: GPIO18
     scl: GPIO23
-    
+
 button:
   - platform: safe_mode
     id: button_safe_mode
@@ -44,7 +44,7 @@ button:
     name: Factory reset
 
 external_components:
-  - source: github://pr#3552  # DAC support https://github.com/esphome/esphome/pull/3552
+  - source: github://pr#3552 # DAC support https://github.com/esphome/esphome/pull/3552
     components: [es8388]
     refresh: 0s
   - source: github://pr#5230
@@ -74,7 +74,7 @@ speaker:
     id: luxe_out
     dac_type: external
     i2s_dout_pin: GPIO26
-    mode: stereo
+    channel: stereo
 
 esp_adf:
 
@@ -120,15 +120,15 @@ voice_assistant:
         condition:
           switch.is_on: use_wake_word
         then:
-        - if:
-            condition:
-              lambda: return id(wake_word_engine_location).state == "On device";
-            then:
-              - micro_wake_word.start:
-              - script.execute: reset_led
-            else:
-              - voice_assistant.start_continuous:
-              - script.execute: reset_led          
+          - if:
+              condition:
+                lambda: return id(wake_word_engine_location).state == "On device";
+              then:
+                - micro_wake_word.start:
+                - script.execute: reset_led
+              else:
+                - voice_assistant.start_continuous:
+                - script.execute: reset_led
   on_error:
     - light.turn_on:
         id: led
@@ -140,7 +140,7 @@ voice_assistant:
     - delay: 2s
     - script.execute: reset_led
   on_client_connected:
-    - delay: 2s  # Give the api server time to settle
+    - delay: 2s # Give the api server time to settle
     - if:
         condition:
           switch.is_on: use_wake_word
@@ -150,7 +150,7 @@ voice_assistant:
                 - lambda: return id(wake_word_engine_location).state == "On device";
               then:
                 - micro_wake_word.start:
-                - script.execute: reset_led  
+                - script.execute: reset_led
               else:
                 - voice_assistant.start_continuous:
                 - script.execute: reset_led
@@ -199,7 +199,7 @@ voice_assistant:
               else:
                 - voice_assistant.start_continuous:
                 - script.execute: reset_led
-            
+
 sensor:
   - platform: adc
     pin: GPIO33
@@ -214,7 +214,7 @@ sensor:
     attenuation: 11db
     raw: true
     filters:
-      - multiply: 0.00173913  # 2300 -> 4, for attenuation 11db, based on Olivier's code
+      - multiply: 0.00173913 # 2300 -> 4, for attenuation 11db, based on Olivier's code
       - exponential_moving_average:
           alpha: 0.2
           send_every: 2
@@ -360,16 +360,16 @@ switch:
           condition:
             switch.is_on: use_wake_word
           then:
-          - if:
-              condition:
-                - lambda: return id(wake_word_engine_location).state == "On device";
-                - switch.is_on: use_wake_word
-              then:
-                - micro_wake_word.start:
-                - script.execute: reset_led
-              else:
-                - voice_assistant.start_continuous:
-                - script.execute: reset_led
+            - if:
+                condition:
+                  - lambda: return id(wake_word_engine_location).state == "On device";
+                  - switch.is_on: use_wake_word
+                then:
+                  - micro_wake_word.start:
+                  - script.execute: reset_led
+                else:
+                  - voice_assistant.start_continuous:
+                  - script.execute: reset_led
     on_turn_off:
       - voice_assistant.stop
       - micro_wake_word.stop:
@@ -393,7 +393,7 @@ switch:
     on_turn_on:
       - delay: 15min
       - switch.turn_off: timer_ringing
-        
+
 select:
   - platform: template
     entity_category: config
